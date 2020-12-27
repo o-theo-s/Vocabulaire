@@ -54,6 +54,7 @@ namespace Vocabulaire
                 OrderBy(_ => Guid.NewGuid()).
                 Where((l, i) => i < testNum).
                 ToDictionary(l => l.Split(',').First().Trim(), l => l.Split(',').Last().Trim());
+            var saveW = new Dictionary<string, string>(w);
 
             do
             {
@@ -113,9 +114,11 @@ namespace Vocabulaire
                         corrects++;
                 }
 
-                Console.ForegroundColor = corrects < w.Count / 2 ? ConsoleColor.Green : ConsoleColor.Red;
-                Console.WriteLine($"\n***  Vous avez écrit {corrects}/{w.Count} mots correctement !  ***\n");
+                Console.Write("\n***  Vous avez écrit ");
+                Console.ForegroundColor = corrects < w.Count / 2 ? ConsoleColor.Red : ConsoleColor.Green;
+                Console.Write($"{corrects}/{w.Count}");
                 Console.ForegroundColor = defColor;
+                Console.WriteLine(" mots correctement !  ***\n");
 
                 if (corrects == w.Count)
                     break;
@@ -128,6 +131,46 @@ namespace Vocabulaire
                 } while (repeat != ConsoleKey.O && repeat != ConsoleKey.N);
 
             } while (repeat == ConsoleKey.O);
+
+            ConsoleKey save = default;
+            while (testNum < lines.Length && save != ConsoleKey.O && save != ConsoleKey.N)
+            {
+                Console.WriteLine("Voulez-vous enregistrer les mots de ce test pour révision ?");
+                save = Console.ReadKey().Key;
+                Console.WriteLine();
+            }
+
+            if (save == ConsoleKey.O)
+            {
+                string fileName = null;
+                while (string.IsNullOrWhiteSpace(fileName))
+                {
+                    Console.WriteLine("Entrez le nom du fichier :");
+                    fileName = Console.ReadLine().Trim();
+                }
+                
+                if (fileName.Contains('.'))
+                {
+                    string[] tokens = fileName.Split('.');
+                    fileName = string.Join("", fileName.Take(tokens.Length - 1));
+                }
+
+                try
+                {
+                    File.WriteAllLines(fileName + ".voc", saveW.Select(kv => kv.Key + ", " + kv.Value));
+                }
+                catch (Exception)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Un problème est survenu lors de l'enregistrement du fichier");
+                    Console.ForegroundColor = defColor;
+                }
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Le fichier a été enregistré avec succès");
+                Console.ForegroundColor = defColor;
+
+                Console.WriteLine();
+            }
 
             Console.WriteLine("Appuyez sur une touche pour quitter...");
             Console.ReadKey();
