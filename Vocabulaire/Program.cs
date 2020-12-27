@@ -57,6 +57,8 @@ namespace Vocabulaire
 
             do
             {
+                Console.Clear();
+
                 if (mistakes.Any())
                     w = mistakes.OrderBy(_ => Guid.NewGuid()).ToDictionary(m => m.Key, m => m.Value);
 
