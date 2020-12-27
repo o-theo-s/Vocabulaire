@@ -113,7 +113,9 @@ namespace Vocabulaire
                         corrects++;
                 }
 
+                Console.ForegroundColor = corrects < w.Count / 2 ? ConsoleColor.Green : ConsoleColor.Red;
                 Console.WriteLine($"\n***  Vous avez écrit {corrects}/{w.Count} mots correctement !  ***\n");
+                Console.ForegroundColor = defColor;
 
                 if (corrects == w.Count)
                     break;
