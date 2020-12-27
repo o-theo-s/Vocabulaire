@@ -95,18 +95,20 @@ namespace Vocabulaire
         {
             Console.WriteLine($"Test orthographique de : {Path.GetFileName(filePath)}");
 
-            string wordsToTestReply;
-            int testNum;
-            do
+            int testNum = lines.Length;
+            if (testNum > 30)
             {
-                Console.WriteLine($"Combien de mots voulez-vous tester ({lines.Length} au total) ? ");
-                wordsToTestReply = Console.ReadLine();
-                if (string.IsNullOrWhiteSpace(wordsToTestReply))
+                string wordsToTestReply;
+                do
                 {
-                    testNum = lines.Length;
-                    break;
-                }
-            } while (!int.TryParse(wordsToTestReply, out testNum));
+                    Console.WriteLine($"Combien de mots voulez-vous tester ({lines.Length} au total) ? ");
+                    wordsToTestReply = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(wordsToTestReply))
+                        break;
+                } while (!int.TryParse(wordsToTestReply, out testNum));
+
+                Console.Clear();
+            }
 
             var w = lines.
                 OrderBy(_ => Guid.NewGuid()).
@@ -118,8 +120,6 @@ namespace Vocabulaire
             ConsoleKey repeat;
             do
             {
-                Console.Clear();
-
                 if (mistakes.Any())
                     w = mistakes.OrderBy(_ => Guid.NewGuid()).ToDictionary(m => m.Key, m => m.Value);
 
