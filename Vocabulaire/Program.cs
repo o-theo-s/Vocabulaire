@@ -9,22 +9,22 @@ namespace Vocabulaire
 {
     class Program
     {
+        private static readonly ConsoleColor defColor = Console.ForegroundColor;
+        private static string filePath = null;
+        private static string[] lines;
+
         static void Main(string[] args)
         {
             Console.InputEncoding = Encoding.Unicode;
             Console.OutputEncoding = Encoding.UTF8;
 
-            var defColor = Console.ForegroundColor;
-            string filePath = null, wordsToTestReply;
-            int testNum, corrects;
-            Dictionary<string, string> mistakes = new Dictionary<string, string>();
-            ConsoleKey repeat;
+            Console.WriteLine("***  Bienvenue à Vocabulaire !  ***\n\n");
 
             if (args.Length > 0)
                 filePath = Path.GetFullPath(args[0]);
             while (!File.Exists(filePath) || !filePath.EndsWith(".voc"))
             {
-                Console.WriteLine("Entrer le fichier de vocabulaire :");
+                Console.WriteLine("Entrez le fichier de vocabulaire :");
                 string input = Console.ReadLine();
                 try
                 {
@@ -36,9 +36,66 @@ namespace Vocabulaire
                 }
             }
 
-            string[] lines = File.ReadAllLines(filePath);
+            lines = File.ReadAllLines(filePath);
 
+            ConsoleKey select = default;
+            while (select != ConsoleKey.B && select != ConsoleKey.T)
+            {
+                Console.WriteLine("Sélectionnez une opération :");
+                Console.WriteLine("\tT: Testez vos compétences orthographiques");
+                Console.WriteLine("\tB: Briser ce fichier en petits tests");
+                
+                select = Console.ReadKey().Key;
+                Console.WriteLine();
+            }
+            Console.Clear();
+
+            if (select == ConsoleKey.B)
+                Briser();
+            else if (select == ConsoleKey.T)
+                Tester();
+
+            Console.WriteLine("\nAppuyez sur une touche pour quitter...");
+            Console.ReadKey();
+        }
+
+        public static string ToUnaccented(string str)
+        {
+            string fullCanonicalDecompositionNormalized = str.Normalize(NormalizationForm.FormD);
+            var unaccented = fullCanonicalDecompositionNormalized.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark);
+
+            return new string(unaccented.ToArray());
+        }
+
+        private static void Briser()
+        {
+            int partsLen = 20;
+            do
+            {
+                Console.WriteLine($"Entrez le nombre de mots pour chaque partie :");
+            } while (!int.TryParse(Console.ReadLine(), out partsLen));
+
+            var parts = lines
+                .Select((x, i) => new { Index = i, Value = x })
+                .GroupBy(x => x.Index / partsLen)
+                .Select(x => x.Select(v => v.Value).ToArray())
+                .ToArray();
+
+            int p = 0;
+            foreach (var part in parts)
+                File.WriteAllLines(Path.GetFileNameWithoutExtension(filePath) + $"_part{++p}.voc", part);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(p + " fichiers ont été enregistrés avec succès");
+            Console.ForegroundColor = defColor;
+        }
+
+        private static void Tester()
+        {
             Console.WriteLine($"Test orthographique de : {Path.GetFileName(filePath)}");
+
+            string wordsToTestReply;
+            int testNum;
             do
             {
                 Console.WriteLine($"Combien de mots voulez-vous tester ({lines.Length} au total) ? ");
@@ -56,6 +113,8 @@ namespace Vocabulaire
                 ToDictionary(l => l.Split(',').First().Trim(), l => l.Split(',').Last().Trim());
             var saveW = new Dictionary<string, string>(w);
 
+            Dictionary<string, string> mistakes = new Dictionary<string, string>();
+            ConsoleKey repeat;
             do
             {
                 Console.Clear();
@@ -64,7 +123,7 @@ namespace Vocabulaire
                     w = mistakes.OrderBy(_ => Guid.NewGuid()).ToDictionary(m => m.Key, m => m.Value);
 
                 mistakes = new Dictionary<string, string>();
-                corrects = 0;
+                int corrects = 0;
 
                 foreach (var pair in w)
                 {
@@ -114,6 +173,8 @@ namespace Vocabulaire
                         corrects++;
                 }
 
+                Console.Clear();
+
                 Console.Write("\n***  Vous avez écrit ");
                 Console.ForegroundColor = corrects < w.Count / 2 ? ConsoleColor.Red : ConsoleColor.Green;
                 Console.Write($"{corrects}/{w.Count}");
@@ -132,14 +193,20 @@ namespace Vocabulaire
 
             } while (repeat == ConsoleKey.O);
 
+            Enregistrer(saveW);
+        }
+
+        private static void Enregistrer(Dictionary<string, string> saveW)
+        {
+            Console.Clear();
+
             ConsoleKey save = default;
-            while (testNum < lines.Length && save != ConsoleKey.O && save != ConsoleKey.N)
+            while (saveW.Count < lines.Length && save != ConsoleKey.O && save != ConsoleKey.N)
             {
                 Console.WriteLine("Voulez-vous enregistrer les mots de ce test pour révision ?");
                 save = Console.ReadKey().Key;
                 Console.WriteLine();
             }
-
             if (save == ConsoleKey.O)
             {
                 string fileName = null;
@@ -148,7 +215,7 @@ namespace Vocabulaire
                     Console.WriteLine("Entrez le nom du fichier :");
                     fileName = Console.ReadLine().Trim();
                 }
-                
+
                 if (fileName.Contains('.'))
                 {
                     string[] tokens = fileName.Split('.');
@@ -171,17 +238,6 @@ namespace Vocabulaire
 
                 Console.WriteLine();
             }
-
-            Console.WriteLine("Appuyez sur une touche pour quitter...");
-            Console.ReadKey();
-        }
-
-        public static string ToUnaccented(string str)
-        {
-            string fullCanonicalDecompositionNormalized = str.Normalize(NormalizationForm.FormD);
-            var unaccented = fullCanonicalDecompositionNormalized.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark);
-
-            return new string(unaccented.ToArray());
         }
     }
 }
