@@ -47,8 +47,9 @@ namespace Vocabulaire
                 
                 select = Console.ReadKey().Key;
                 Console.WriteLine();
+
+                Console.Clear();
             }
-            Console.Clear();
 
             if (select == ConsoleKey.B)
                 Briser();
@@ -198,11 +199,10 @@ namespace Vocabulaire
 
         private static void Enregistrer(Dictionary<string, string> saveW)
         {
-            Console.Clear();
-
             ConsoleKey save = default;
             while (saveW.Count < lines.Length && save != ConsoleKey.O && save != ConsoleKey.N)
             {
+                Console.Clear();
                 Console.WriteLine("Voulez-vous enregistrer les mots de ce test pour révision ?");
                 save = Console.ReadKey().Key;
                 Console.WriteLine();
