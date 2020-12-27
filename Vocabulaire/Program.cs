@@ -39,7 +39,7 @@ namespace Vocabulaire
             lines = File.ReadAllLines(filePath);
 
             ConsoleKey select = default;
-            while (select != ConsoleKey.B && select != ConsoleKey.T)
+            while (lines.Length >= 100 && select != ConsoleKey.B && select != ConsoleKey.T)
             {
                 Console.WriteLine("Sélectionnez une opération :");
                 Console.WriteLine("\tT: Testez vos compétences orthographiques");
@@ -52,7 +52,7 @@ namespace Vocabulaire
 
             if (select == ConsoleKey.B)
                 Briser();
-            else if (select == ConsoleKey.T)
+            else // select == ConsoleKey.T
                 Tester();
 
             Console.WriteLine("\nAppuyez sur une touche pour quitter...");
