@@ -174,8 +174,6 @@ namespace Vocabulaire
                         corrects++;
                 }
 
-                Console.Clear();
-
                 Console.Write("\n***  Vous avez écrit ");
                 Console.ForegroundColor = corrects < w.Count / 2 ? ConsoleColor.Red : ConsoleColor.Green;
                 Console.Write($"{corrects}/{w.Count}");
@@ -191,6 +189,8 @@ namespace Vocabulaire
                     repeat = Console.ReadKey().Key;
                     Console.WriteLine("\n");
                 } while (repeat != ConsoleKey.O && repeat != ConsoleKey.N);
+
+                Console.Clear();
 
             } while (repeat == ConsoleKey.O);
 
