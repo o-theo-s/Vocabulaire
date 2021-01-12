@@ -36,7 +36,9 @@ namespace Vocabulaire
                 }
             }
 
-            lines = File.ReadAllLines(filePath);
+            lines = File.ReadAllLines(filePath).
+                Where(l => l.Split(',', StringSplitOptions.RemoveEmptyEntries).Length == 2).
+                ToArray();
 
             ConsoleKey select = default;
             while (lines.Length >= 100 && select != ConsoleKey.B && select != ConsoleKey.T)
@@ -112,7 +114,7 @@ namespace Vocabulaire
 
             var w = lines.
                 OrderBy(_ => Guid.NewGuid()).
-                Where((l, i) => i < testNum).
+                Where((_, i) => i < testNum).
                 ToDictionary(l => l.Split(',').First().Trim(), l => l.Split(',').Last().Trim());
             var saveW = new Dictionary<string, string>(w);
 
